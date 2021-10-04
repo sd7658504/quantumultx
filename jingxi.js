@@ -25,28 +25,47 @@ if ($.isNode()) {
   cookiesArr.push($.getdata('CookieJD'));
   cookiesArr.push($.getdata('CookieJD2'))
 }
+
 !(async () => {
+  await requireConfig();
   if (!cookiesArr[0]) {
-    $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/', {"open-url": "https://bean.m.jd.com/"});
+    $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', {"open-url": "https://bean.m.jd.com/bean/signIndex.action"});
     return;
   }
   for (let i = 0; i < cookiesArr.length; i++) {
     if (cookiesArr[i]) {
       cookie = cookiesArr[i];
-      UserName = decodeURIComponent(cookie.match(/pt_pin=(\w+)/) && cookie.match(/pt_pin=(\w+)/)[1])
+      $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
       $.index = i + 1;
-      console.log(`\n开始【京东账号${$.index}】${UserName}\n`);
-      await getsign();
-      await Tasklist();
-      await doublesign();
-      await coininfo();
-      await showmsg();
-    if ($.isNode()){
-       await notify.sendNotify($.name + " 账号昵称:" + nickname, $.sub+`\n`+$.desc)
-         }
+      $.isLogin = true;
+      $.nickName = '';
+      await TotalBean();
+      console.log(`\n开始【京东账号${$.index}】${$.nickName || $.UserName}\n`);
+      if (!$.isLogin) {
+        $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, {"open-url": "https://bean.m.jd.com/bean/signIndex.action"});
+
+        if ($.isNode()) {
+          await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`);
+        }
+        continue
+      }
+      message = '';
+      subTitle = '';
+      option = {};
+      await shareCodesFormat();
+      await jdPlantBean();
+      await showMsg();
     }
   }
-})()
+  if ($.isNode() && allMessage) {
+    await notify.sendNotify(`${$.name}`, `${allMessage}`)
+  }
+})().catch((e) => {
+  $.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
+}).finally(() => {
+  $.done();
+})
+
     .catch((e) => $.logErr(e))
     .finally(() => $.done())
 
