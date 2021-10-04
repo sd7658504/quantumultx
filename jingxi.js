@@ -13,18 +13,7 @@ hostname = wq.jd.com
 */
 
 const $ = new Env('京喜');
-let cookiesArr = [], cookie = '', signresult,todaypoint = 0;
-const notify = $.isNode() ? require('./sendNotify') : '';
-const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
-
-if ($.isNode()) {
-  Object.keys(jdCookieNode).forEach((item) => {
-    cookiesArr.push(jdCookieNode[item])
-  })
-} else {
-  cookiesArr.push($.getdata('CookieJD'));
-  cookiesArr.push($.getdata('CookieJD2'))
-}
+let cookiesArr = [], cookie = '', 
 
 !(async () => {
   await requireConfig();
